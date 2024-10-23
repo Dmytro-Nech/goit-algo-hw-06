@@ -18,7 +18,7 @@ class Name(Field):
 class Phone(Field):
     # Можемо перевіряти формат телефону в цьому класі
     def __init__(self, phone):
-        if len(phone) == 10:
+        if len(phone) == 10 and phone.isdigit():
             super().__init__(phone)
         else:
             raise ValueError("Invalid phone format")
@@ -38,27 +38,26 @@ class Record:
 
 
     def edit_phone(self, phone, new_phone):
-        phone = Phone(phone)
         new_phone = Phone(new_phone)
-        try:
-            index = self.phones.index(phone) 
-            self.phones[index] = new_phone
-        except ValueError:
-            print("Phone not found")
+        for p in self.phones:
+            if p.value == phone:
+                index = self.phones.index(p) 
+                self.phones[index] = new_phone
+                return
+
+        raise ValueError
 
 
     def find_phone(self, phone):
         phone = Phone(phone)
-        for p in self.phones:
-            if p == phone:
-                return p
-        return None
+        return next((p for p in self.phones if p.value == phone.value), None)
+
         
     
     def remove_phone(self, phone):
-        phone = Phone(phone)
-        if phone in self.phones:
-            self.phones.remove(phone)
+        for p in self.phones:
+            if p.value == phone:
+               self.phones.remove(p)
         else:
             print('Phone doesn`t exist')
             
@@ -68,9 +67,6 @@ class Record:
 
 
 class AddressBook(UserDict):
-
-    def __init__(self):
-        self.data = {}  # Словник для зберігання записів
     
     def add_record(self, record):
         self.data[record.name.value] = record
